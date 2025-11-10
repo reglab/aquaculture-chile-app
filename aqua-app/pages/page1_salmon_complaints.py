@@ -58,7 +58,7 @@ import sshtunnel
 
 
 # concessions_2024 = gpd.read_file('data/concession/from_sma_Approved areas_ccaa_nac_shp_042024/ccaa_nacional.shp')
-concessions_2024 = pd.read_csv('data/concession/concessions_2024.csv')
+concessions_2024 = pd.read_csv('data/concession/concessions_2024_lat_long.csv')
 concessions_2024 = concessions_2024.drop_duplicates()
 concessions_2024 = concessions_2024.rename(columns={'N_CODIGOCE': 'Rna'})
 concessions_2024_lat_long = process_dataframe_coordinates(concessions_2024, 'COORDENADA')
