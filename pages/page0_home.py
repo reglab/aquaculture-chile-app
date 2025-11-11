@@ -7,14 +7,13 @@ import time
 from pyprojroot import here
 
 
-# spinner until the entire page is loaded
-with st.spinner("Loading page..."):
-    # pause for 3 seconds
-    time.sleep(3)
+# # spinner until the entire page is loaded
+# with st.spinner("Loading page..."):
+#     # pause for 3 seconds
+#     time.sleep(3)
 
-# @st.cache_data(show_spinner="Loading map...")
+@st.cache_data(show_spinner="Loading map...")
 def load_html_map():
-    # open /Users/victholl/Documents/aquaculture-chile-app/aqua-app/media/concession_eda_production_bubble_map2.html
     with open('media/concession_eda_production_bubble_map2.html', 'r') as file:
         html_map = file.read()
     return html_map
