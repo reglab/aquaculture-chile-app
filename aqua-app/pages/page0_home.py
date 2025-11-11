@@ -9,6 +9,8 @@ from pyprojroot import here
 # set root directory
 root = here()
 
+print(root)
+
 # spinner until the entire page is loaded
 with st.spinner("Loading page..."):
     time.sleep(3)
