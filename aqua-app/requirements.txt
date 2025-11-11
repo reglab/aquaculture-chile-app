@@ -15,7 +15,7 @@ psycopg2-binary==2.9.11
 sshtunnel==0.3.2
 pydeck==0.9.1
 SQLAlchemy==1.4.35
-time==0.1.1
+# time==0.1.1
 streamlit-spinner==0.1.2
 
 # # Essential dependencies for the above packages
