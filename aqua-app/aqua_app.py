@@ -54,16 +54,24 @@ authenticator = stauth.Authenticate(
 
 name, authentication_status, username = authenticator.login("Aquaculture Chile Login", "main")
 
+def finish_session():
+    authenticator.logout("End Session", "sidebar")
+
+import os 
 if authentication_status == False:
     st.error("Username/password is incorrect")
 elif authentication_status == None:
     st.warning("Please enter your username and password")
 elif authentication_status == True:
-    
-    
-    def finish_session():
-        authenticator.logout("End Session", "sidebar")
-    
-    st.sidebar.button("End Session", on_click=finish_session)
     pg.run()
     st.sidebar.write(f"Welcome, {name}!")
+    st.sidebar.button("End Session", on_click=finish_session)
+
+    # print current directory
+    print('current directory:')
+    print(os.getcwd())  
+    st.write('current directory:')
+    st.write(os.getcwd())  
+    
+
+
