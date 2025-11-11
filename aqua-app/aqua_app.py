@@ -71,4 +71,5 @@ elif authentication_status == True:
 
 import os 
 # print current directory
+print('current directory:')
 print(os.getcwd())  
