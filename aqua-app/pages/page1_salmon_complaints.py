@@ -56,6 +56,63 @@ import sshtunnel
 # st.dataframe(production_limits_df)
 # st.dataframe(aqua_tipline)
 
+conn = st.connection("postgresql", type="sql")
+concessions_2024 = conn.query("select * from raw.concessions_2024")
+aqua_tipline = conn.query("select * from raw.aquaculture_tips")
+production_limits_df = conn.query("select * from raw.production_limits")
+IdSea_Rna = conn.query("select * from raw.ids_xwalk")
+
+# DATA CLEANING - to be updated in postgres database
+
+# convert all Production Limits to tons
+production_limits_df['Production_Limit_ton_calculated'] = production_limits_df.apply(lambda row: row['LimiteProduccion'] / 1000 if row['UnidadMedidaProduccionId'] == 2 else row['LimiteProduccion'], axis=1)
+# replace Producción with Nan in IdSea
+production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Producción)', np.nan) # only 10 cases of this
+production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Biomasa Último Año de', np.nan) # only 9 cases of this
+# remove nan in IdSea
+production_limits_df = production_limits_df[production_limits_df['IdSea'].notna()]
+# convert IdSea to int
+production_limits_df['IdSea'] = production_limits_df['IdSea'].astype(int)
+
+# rename N_CODIGOCE to Rna in concessions_2024
+concessions_2024 = concessions_2024.rename(columns={'N_CODIGOCE': 'Rna'})
+concessions_2024_lat_long = process_dataframe_coordinates(concessions_2024, 'COORDENADA')
+
+### Salmon Concessions - IdSea + Technical Projects
+# drop nan in ESPECIES
+concessions_2024_lat_long = concessions_2024_lat_long[concessions_2024_lat_long['ESPECIES'].notna()]
+# filter for cases where salmon is in ESPECIES
+concessions_2024_salmon = concessions_2024_lat_long[concessions_2024_lat_long['ESPECIES'].str.contains('SALMON')] # no Rna or IdSea yet
+# Salmon Concessions by Owner with Concessions Permit - Rna 
+concessions_2024_IdSea = pd.merge(concessions_2024_salmon, IdSea_Rna, on='Rna', how='left')
+
+# remove duplicate Rna from concessions_2024_salmon
+concessions_2024_salmon = concessions_2024_salmon.drop_duplicates(subset=['Rna'])
+print('length of concessions_2024_salmon:', len(concessions_2024_salmon))
+
+### Concessions by Production
+# remove nan in IdSea
+concessions_2024_IdSea_not_null = concessions_2024_IdSea[concessions_2024_IdSea['IdSea'].notna()]
+# make IdSea an int
+concessions_2024_IdSea_not_null['IdSea'] = concessions_2024_IdSea_not_null['IdSea'].astype(int)
+production_limits_concessions_IdSea = pd.merge(concessions_2024_IdSea_not_null, production_limits_df, on='IdSea', how='left')
+concessions_2024_by_production = production_limits_concessions_IdSea[production_limits_concessions_IdSea['Production_Limit_ton_calculated'].notna()]
+
+
+# convert all Production Limits to tons
+production_limits_df['Production_Limit_ton_calculated'] = production_limits_df.apply(lambda row: row['LimiteProduccion'] / 1000 if row['UnidadMedidaProduccionId'] == 2 else row['LimiteProduccion'], axis=1)
+# replace Producción with Nan in IdSea
+production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Producción)', np.nan) # only 10 cases of this
+production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Biomasa Último Año de', np.nan) # only 9 cases of this
+# remove nan in IdSea
+production_limits_df = production_limits_df[production_limits_df['IdSea'].notna()]
+# convert IdSea to int
+production_limits_df['IdSea'] = production_limits_df['IdSea'].astype(int)
+
+# rename N_CODIGOCE to Rna in concessions_2024
+concessions_2024 = concessions_2024.rename(columns={'N_CODIGOCE': 'Rna'})
+concessions_2024_lat_long = process_dataframe_coordinates(concessions_2024, 'COORDENADA')
+
 
 # concessions_2024 = gpd.read_file('data/concession/from_sma_Approved areas_ccaa_nac_shp_042024/ccaa_nacional.shp')
 concessions_2024 = pd.read_csv('data/concession/concessions_2024_lat_long.csv')

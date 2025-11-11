@@ -17,7 +17,6 @@ print(root)
 #     time.sleep(3)
 
 # # @st.cache_data(show_spinner="Loading map...")
-# # insert html map from /Users/victholl/Documents/aquaculture_chile/vict_playground/concession_eda.html
 # def load_html_map():
 #     with open(root / 'media' / 'concession_eda_production_bubble_map2.html', 'r') as file:
 #         html_map = file.read()
