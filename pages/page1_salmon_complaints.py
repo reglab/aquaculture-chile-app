@@ -62,287 +62,292 @@ aqua_tipline = conn.query("select * from raw.aquaculture_tips")
 production_limits_df = conn.query("select * from raw.production_limits")
 IdSea_Rna = conn.query("select * from raw.ids_xwalk")
 
-# DATA CLEANING - to be updated in postgres database
+st.dataframe(concessions_2024)
+st.dataframe(aqua_tipline)
+st.dataframe(production_limits_df)
+st.dataframe(IdSea_Rna)
 
-# convert all Production Limits to tons
-production_limits_df['Production_Limit_ton_calculated'] = production_limits_df.apply(lambda row: row['LimiteProduccion'] / 1000 if row['UnidadMedidaProduccionId'] == 2 else row['LimiteProduccion'], axis=1)
-# replace Producción with Nan in IdSea
-production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Producción)', np.nan) # only 10 cases of this
-production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Biomasa Último Año de', np.nan) # only 9 cases of this
-# remove nan in IdSea
-production_limits_df = production_limits_df[production_limits_df['IdSea'].notna()]
-# convert IdSea to int
-production_limits_df['IdSea'] = production_limits_df['IdSea'].astype(int)
+# # DATA CLEANING - to be updated in postgres database
 
-# rename N_CODIGOCE to Rna in concessions_2024
-concessions_2024 = concessions_2024.rename(columns={'N_CODIGOCE': 'Rna'})
-concessions_2024_lat_long = process_dataframe_coordinates(concessions_2024, 'COORDENADA')
+# # convert all Production Limits to tons
+# production_limits_df['Production_Limit_ton_calculated'] = production_limits_df.apply(lambda row: row['LimiteProduccion'] / 1000 if row['UnidadMedidaProduccionId'] == 2 else row['LimiteProduccion'], axis=1)
+# # replace Producción with Nan in IdSea
+# production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Producción)', np.nan) # only 10 cases of this
+# production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Biomasa Último Año de', np.nan) # only 9 cases of this
+# # remove nan in IdSea
+# production_limits_df = production_limits_df[production_limits_df['IdSea'].notna()]
+# # convert IdSea to int
+# production_limits_df['IdSea'] = production_limits_df['IdSea'].astype(int)
 
-### Salmon Concessions - IdSea + Technical Projects
-# drop nan in ESPECIES
-concessions_2024_lat_long = concessions_2024_lat_long[concessions_2024_lat_long['ESPECIES'].notna()]
-# filter for cases where salmon is in ESPECIES
-concessions_2024_salmon = concessions_2024_lat_long[concessions_2024_lat_long['ESPECIES'].str.contains('SALMON')] # no Rna or IdSea yet
-# Salmon Concessions by Owner with Concessions Permit - Rna 
-concessions_2024_IdSea = pd.merge(concessions_2024_salmon, IdSea_Rna, on='Rna', how='left')
+# # rename N_CODIGOCE to Rna in concessions_2024
+# concessions_2024 = concessions_2024.rename(columns={'N_CODIGOCE': 'Rna'})
+# concessions_2024_lat_long = process_dataframe_coordinates(concessions_2024, 'COORDENADA')
 
-# remove duplicate Rna from concessions_2024_salmon
-concessions_2024_salmon = concessions_2024_salmon.drop_duplicates(subset=['Rna'])
-print('length of concessions_2024_salmon:', len(concessions_2024_salmon))
+# ### Salmon Concessions - IdSea + Technical Projects
+# # drop nan in ESPECIES
+# concessions_2024_lat_long = concessions_2024_lat_long[concessions_2024_lat_long['ESPECIES'].notna()]
+# # filter for cases where salmon is in ESPECIES
+# concessions_2024_salmon = concessions_2024_lat_long[concessions_2024_lat_long['ESPECIES'].str.contains('SALMON')] # no Rna or IdSea yet
+# # Salmon Concessions by Owner with Concessions Permit - Rna 
+# concessions_2024_IdSea = pd.merge(concessions_2024_salmon, IdSea_Rna, on='Rna', how='left')
 
-### Concessions by Production
-# remove nan in IdSea
-concessions_2024_IdSea_not_null = concessions_2024_IdSea[concessions_2024_IdSea['IdSea'].notna()]
-# make IdSea an int
-concessions_2024_IdSea_not_null['IdSea'] = concessions_2024_IdSea_not_null['IdSea'].astype(int)
-production_limits_concessions_IdSea = pd.merge(concessions_2024_IdSea_not_null, production_limits_df, on='IdSea', how='left')
-concessions_2024_by_production = production_limits_concessions_IdSea[production_limits_concessions_IdSea['Production_Limit_ton_calculated'].notna()]
+# # remove duplicate Rna from concessions_2024_salmon
+# concessions_2024_salmon = concessions_2024_salmon.drop_duplicates(subset=['Rna'])
+# print('length of concessions_2024_salmon:', len(concessions_2024_salmon))
 
-
-# convert all Production Limits to tons
-production_limits_df['Production_Limit_ton_calculated'] = production_limits_df.apply(lambda row: row['LimiteProduccion'] / 1000 if row['UnidadMedidaProduccionId'] == 2 else row['LimiteProduccion'], axis=1)
-# replace Producción with Nan in IdSea
-production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Producción)', np.nan) # only 10 cases of this
-production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Biomasa Último Año de', np.nan) # only 9 cases of this
-# remove nan in IdSea
-production_limits_df = production_limits_df[production_limits_df['IdSea'].notna()]
-# convert IdSea to int
-production_limits_df['IdSea'] = production_limits_df['IdSea'].astype(int)
-
-# rename N_CODIGOCE to Rna in concessions_2024
-concessions_2024 = concessions_2024.rename(columns={'N_CODIGOCE': 'Rna'})
-concessions_2024_lat_long = process_dataframe_coordinates(concessions_2024, 'COORDENADA')
+# ### Concessions by Production
+# # remove nan in IdSea
+# concessions_2024_IdSea_not_null = concessions_2024_IdSea[concessions_2024_IdSea['IdSea'].notna()]
+# # make IdSea an int
+# concessions_2024_IdSea_not_null['IdSea'] = concessions_2024_IdSea_not_null['IdSea'].astype(int)
+# production_limits_concessions_IdSea = pd.merge(concessions_2024_IdSea_not_null, production_limits_df, on='IdSea', how='left')
+# concessions_2024_by_production = production_limits_concessions_IdSea[production_limits_concessions_IdSea['Production_Limit_ton_calculated'].notna()]
 
 
-# concessions_2024 = gpd.read_file('data/concession/from_sma_Approved areas_ccaa_nac_shp_042024/ccaa_nacional.shp')
-concessions_2024 = pd.read_csv('data/concession/concessions_2024_lat_long.csv')
-concessions_2024 = concessions_2024.drop_duplicates()
-concessions_2024 = concessions_2024.rename(columns={'N_CODIGOCE': 'Rna'})
-concessions_2024_lat_long = process_dataframe_coordinates(concessions_2024, 'COORDENADA')
-concessions_2024_lat_long = concessions_2024_lat_long[concessions_2024_lat_long['latitude'].notna()]
-concessions_2024_lat_long = concessions_2024_lat_long[concessions_2024_lat_long['longitude'].notna()]
+# # convert all Production Limits to tons
+# production_limits_df['Production_Limit_ton_calculated'] = production_limits_df.apply(lambda row: row['LimiteProduccion'] / 1000 if row['UnidadMedidaProduccionId'] == 2 else row['LimiteProduccion'], axis=1)
+# # replace Producción with Nan in IdSea
+# production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Producción)', np.nan) # only 10 cases of this
+# production_limits_df['IdSea'] = production_limits_df['IdSea'].replace('Biomasa Último Año de', np.nan) # only 9 cases of this
+# # remove nan in IdSea
+# production_limits_df = production_limits_df[production_limits_df['IdSea'].notna()]
+# # convert IdSea to int
+# production_limits_df['IdSea'] = production_limits_df['IdSea'].astype(int)
 
-## Complaints Data
-
-aqua_tipline = pd.read_excel('data/tipline/aquaculture_tips.xlsx')
-aqua_tipline = aqua_tipline.drop_duplicates()
-
-
-# open csv as df data/concession/concessions_2024_by_production_streamlit.csv
-
-production_df = pd.read_csv('data/concession/concessions_2024_by_production_streamlit.csv')
-concessions_2024_by_production_complaints = pd.read_csv('data/concession/concessions_2024_by_production_complaints.csv')
-
-concessions_2024_by_production_complaints['AGE_OF_CONCESSION (Years)'] = pd.to_datetime('2025-01-01') - pd.to_datetime(concessions_2024_by_production_complaints['F_RESOLSSP'])
-# remove years and convert to float
-concessions_2024_by_production_complaints['AGE_OF_CONCESSION (Years)'] = concessions_2024_by_production_complaints['AGE_OF_CONCESSION (Years)'].dt.days / 365
-# convert to integer
-concessions_2024_by_production_complaints['AGE_OF_CONCESSION (Years)'] = concessions_2024_by_production_complaints['AGE_OF_CONCESSION (Years)'].astype(int)
-# filter for IdSea is Nan
-technical_projects = pd.read_csv('data/concession/technical_projects_2024_streamlit.csv')
-technical_projects['AGE_OF_CONCESSION (Years)'] = pd.to_datetime('2025-01-01') - pd.to_datetime(technical_projects['F_RESOLSSP'])
-# remove years and convert to float
-technical_projects['AGE_OF_CONCESSION (Years)'] = technical_projects['AGE_OF_CONCESSION (Years)'].dt.days / 365
-# convert to integer
-technical_projects['AGE_OF_CONCESSION (Years)'] = technical_projects['AGE_OF_CONCESSION (Years)'].astype(int)
-technical_projects = technical_projects.rename(columns={'Rna': 'Rna_Technical_Projects', 'IdSea': 'IdSea_Technical_Projects', 'Production_Limit_ton_calculated': 'Production_Limit_ton_calculated_Technical_Projects', 'SUPERFICIE': 'SUPERFICIE_Technical_Projects', 'AGE_OF_CONCESSION (Years)': 'AGE_OF_CONCESSION (Years) Technical_Projects', 'TITULAR': 'TITULAR_Technical_Projects', 'REGION': 'REGION_Technical_Projects', 'ComplaintCount': 'ComplaintCount_Technical_Projects'})
-
-fig = px.scatter(
-    concessions_2024_by_production_complaints,
-    x="Production_Limit_ton_calculated",
-    y="SUPERFICIE",
-    size="ComplaintCount",
-    color="TITULAR",
-    hover_name="TITULAR",
-    log_x=False,
-    size_max=60,
-    hover_data=["Rna", "REGION", "TITULAR", "Production_Limit_ton_calculated", "SUPERFICIE", "ComplaintCount"]
-)
-
-fig.update_layout(
-        xaxis_range=[-2000, 20000],             # Set x-axis range
-        yaxis_range=[-50, 200])
-
-fig2 = px.scatter(
-    concessions_2024_by_production_complaints,
-    x="Production_Limit_ton_calculated",
-    y="AGE_OF_CONCESSION (Years)",
-    size="ComplaintCount",
-    color="TITULAR",
-    hover_name="TITULAR",
-    log_x=False,
-    size_max=60,
-    hover_data=["Rna", "REGION", "TITULAR", "Production_Limit_ton_calculated", "AGE_OF_CONCESSION (Years)", "ComplaintCount"]
-)
-
-fig2.update_layout(
-    xaxis_range=[-2000, 20000],
-    yaxis_range=[-5, 55])
-
-fig3 = px.scatter(
-    concessions_2024_by_production_complaints,
-    x="Production_Limit_ton_calculated",
-    y="SUPERFICIE",
-    size="ComplaintCount",
-    color="REGION",
-    hover_name="REGION",
-    log_x=False,
-    size_max=60,
-    hover_data=["Rna", "REGION", "TITULAR", "Production_Limit_ton_calculated", "SUPERFICIE", "ComplaintCount"]
-)
-
-fig3.update_layout(
-    xaxis_range=[-2000, 20000],
-    yaxis_range=[-50, 200])
-
-fig4 = px.scatter(
-    concessions_2024_by_production_complaints,
-    x="Production_Limit_ton_calculated",
-    y="AGE_OF_CONCESSION (Years)",
-    size="ComplaintCount",
-    color="REGION",
-    hover_name="REGION",
-    log_x=False,
-    size_max=60,
-    hover_data=["Rna", "REGION", "TITULAR", "Production_Limit_ton_calculated", "AGE_OF_CONCESSION (Years)", "ComplaintCount"])
-
-fig4.update_layout(
-    xaxis_range=[-2000, 20000],
-    yaxis_range=[-5, 55])
+# # rename N_CODIGOCE to Rna in concessions_2024
+# concessions_2024 = concessions_2024.rename(columns={'N_CODIGOCE': 'Rna'})
+# concessions_2024_lat_long = process_dataframe_coordinates(concessions_2024, 'COORDENADA')
 
 
-fig5 = px.scatter(
-    technical_projects,
-    x="AGE_OF_CONCESSION (Years) Technical_Projects",
-    y="SUPERFICIE_Technical_Projects",
-    # size="ComplaintCount_Technical_Projects",
-    color="REGION_Technical_Projects",
-    hover_name="REGION_Technical_Projects",
-    log_x=False,
-    size_max=60,
-    hover_data=["Rna_Technical_Projects", "REGION_Technical_Projects", "TITULAR_Technical_Projects", "SUPERFICIE_Technical_Projects", ]
-    )
+# # concessions_2024 = gpd.read_file('data/concession/from_sma_Approved areas_ccaa_nac_shp_042024/ccaa_nacional.shp')
+# concessions_2024 = pd.read_csv('data/concession/concessions_2024_lat_long.csv')
+# concessions_2024 = concessions_2024.drop_duplicates()
+# concessions_2024 = concessions_2024.rename(columns={'N_CODIGOCE': 'Rna'})
+# concessions_2024_lat_long = process_dataframe_coordinates(concessions_2024, 'COORDENADA')
+# concessions_2024_lat_long = concessions_2024_lat_long[concessions_2024_lat_long['latitude'].notna()]
+# concessions_2024_lat_long = concessions_2024_lat_long[concessions_2024_lat_long['longitude'].notna()]
 
-fig5.update_layout(
-    xaxis_range=[-5, 55],
-    yaxis_range=[-50, 200])
+# ## Complaints Data
 
-fig6 = px.scatter(
-    technical_projects,
-    x="AGE_OF_CONCESSION (Years) Technical_Projects",
-    y="SUPERFICIE_Technical_Projects",
-    # size=,
-    color="T_GRUPOESP",
-    hover_name="T_GRUPOESP",
-    log_x=False,
-    size_max=60,
-    hover_data=["Rna_Technical_Projects", "T_GRUPOESP", "TITULAR_Technical_Projects", "AGE_OF_CONCESSION (Years) Technical_Projects", ])
-
-fig6.update_layout(
-    xaxis_range=[-5, 55],
-    yaxis_range=[-50, 200])
-
-fig7 = px.scatter(
-    technical_projects,
-    x="AGE_OF_CONCESSION (Years) Technical_Projects",
-    y="SUPERFICIE_Technical_Projects",
-    # size=,
-    color="TITULAR_Technical_Projects",
-    hover_name="TITULAR_Technical_Projects",
-    log_x=False,
-    size_max=60,
-    hover_data=["Rna_Technical_Projects", "REGION_Technical_Projects", "TITULAR_Technical_Projects","SUPERFICIE_Technical_Projects", ])
-
-fig7.update_layout(
-    xaxis_range=[-5, 55],
-    yaxis_range=[-50, 200])
-
-fig8 = px.scatter(
-    technical_projects,
-    x="AGE_OF_CONCESSION (Years) Technical_Projects",
-    y="SUPERFICIE_Technical_Projects",
-    # size=,
-    color="TOPONIMIO",
-    hover_name="TOPONIMIO",
-    log_x=False,
-    size_max=60,
-    hover_data=["Rna_Technical_Projects", "REGION_Technical_Projects", "TITULAR_Technical_Projects", "AGE_OF_CONCESSION (Years) Technical_Projects", "SUPERFICIE_Technical_Projects"])
+# aqua_tipline = pd.read_excel('data/tipline/aquaculture_tips.xlsx')
+# aqua_tipline = aqua_tipline.drop_duplicates()
 
 
-fig8.update_layout(
-    xaxis_range=[-5, 55],
-    yaxis_range=[-50, 200])
+# # open csv as df data/concession/concessions_2024_by_production_streamlit.csv
+
+# production_df = pd.read_csv('data/concession/concessions_2024_by_production_streamlit.csv')
+# concessions_2024_by_production_complaints = pd.read_csv('data/concession/concessions_2024_by_production_complaints.csv')
+
+# concessions_2024_by_production_complaints['AGE_OF_CONCESSION (Years)'] = pd.to_datetime('2025-01-01') - pd.to_datetime(concessions_2024_by_production_complaints['F_RESOLSSP'])
+# # remove years and convert to float
+# concessions_2024_by_production_complaints['AGE_OF_CONCESSION (Years)'] = concessions_2024_by_production_complaints['AGE_OF_CONCESSION (Years)'].dt.days / 365
+# # convert to integer
+# concessions_2024_by_production_complaints['AGE_OF_CONCESSION (Years)'] = concessions_2024_by_production_complaints['AGE_OF_CONCESSION (Years)'].astype(int)
+# # filter for IdSea is Nan
+# technical_projects = pd.read_csv('data/concession/technical_projects_2024_streamlit.csv')
+# technical_projects['AGE_OF_CONCESSION (Years)'] = pd.to_datetime('2025-01-01') - pd.to_datetime(technical_projects['F_RESOLSSP'])
+# # remove years and convert to float
+# technical_projects['AGE_OF_CONCESSION (Years)'] = technical_projects['AGE_OF_CONCESSION (Years)'].dt.days / 365
+# # convert to integer
+# technical_projects['AGE_OF_CONCESSION (Years)'] = technical_projects['AGE_OF_CONCESSION (Years)'].astype(int)
+# technical_projects = technical_projects.rename(columns={'Rna': 'Rna_Technical_Projects', 'IdSea': 'IdSea_Technical_Projects', 'Production_Limit_ton_calculated': 'Production_Limit_ton_calculated_Technical_Projects', 'SUPERFICIE': 'SUPERFICIE_Technical_Projects', 'AGE_OF_CONCESSION (Years)': 'AGE_OF_CONCESSION (Years) Technical_Projects', 'TITULAR': 'TITULAR_Technical_Projects', 'REGION': 'REGION_Technical_Projects', 'ComplaintCount': 'ComplaintCount_Technical_Projects'})
+
+# fig = px.scatter(
+#     concessions_2024_by_production_complaints,
+#     x="Production_Limit_ton_calculated",
+#     y="SUPERFICIE",
+#     size="ComplaintCount",
+#     color="TITULAR",
+#     hover_name="TITULAR",
+#     log_x=False,
+#     size_max=60,
+#     hover_data=["Rna", "REGION", "TITULAR", "Production_Limit_ton_calculated", "SUPERFICIE", "ComplaintCount"]
+# )
+
+# fig.update_layout(
+#         xaxis_range=[-2000, 20000],             # Set x-axis range
+#         yaxis_range=[-50, 200])
+
+# fig2 = px.scatter(
+#     concessions_2024_by_production_complaints,
+#     x="Production_Limit_ton_calculated",
+#     y="AGE_OF_CONCESSION (Years)",
+#     size="ComplaintCount",
+#     color="TITULAR",
+#     hover_name="TITULAR",
+#     log_x=False,
+#     size_max=60,
+#     hover_data=["Rna", "REGION", "TITULAR", "Production_Limit_ton_calculated", "AGE_OF_CONCESSION (Years)", "ComplaintCount"]
+# )
+
+# fig2.update_layout(
+#     xaxis_range=[-2000, 20000],
+#     yaxis_range=[-5, 55])
+
+# fig3 = px.scatter(
+#     concessions_2024_by_production_complaints,
+#     x="Production_Limit_ton_calculated",
+#     y="SUPERFICIE",
+#     size="ComplaintCount",
+#     color="REGION",
+#     hover_name="REGION",
+#     log_x=False,
+#     size_max=60,
+#     hover_data=["Rna", "REGION", "TITULAR", "Production_Limit_ton_calculated", "SUPERFICIE", "ComplaintCount"]
+# )
+
+# fig3.update_layout(
+#     xaxis_range=[-2000, 20000],
+#     yaxis_range=[-50, 200])
+
+# fig4 = px.scatter(
+#     concessions_2024_by_production_complaints,
+#     x="Production_Limit_ton_calculated",
+#     y="AGE_OF_CONCESSION (Years)",
+#     size="ComplaintCount",
+#     color="REGION",
+#     hover_name="REGION",
+#     log_x=False,
+#     size_max=60,
+#     hover_data=["Rna", "REGION", "TITULAR", "Production_Limit_ton_calculated", "AGE_OF_CONCESSION (Years)", "ComplaintCount"])
+
+# fig4.update_layout(
+#     xaxis_range=[-2000, 20000],
+#     yaxis_range=[-5, 55])
 
 
-st.subheader("Salmons Concessions & Complaints Exploration")
+# fig5 = px.scatter(
+#     technical_projects,
+#     x="AGE_OF_CONCESSION (Years) Technical_Projects",
+#     y="SUPERFICIE_Technical_Projects",
+#     # size="ComplaintCount_Technical_Projects",
+#     color="REGION_Technical_Projects",
+#     hover_name="REGION_Technical_Projects",
+#     log_x=False,
+#     size_max=60,
+#     hover_data=["Rna_Technical_Projects", "REGION_Technical_Projects", "TITULAR_Technical_Projects", "SUPERFICIE_Technical_Projects", ]
+#     )
 
-tab3, tab4 = st.tabs(["Production vs. Surface Area vs. Complaints by Region", "Production vs. Age of Concessions vs. Complaints by Region"])
-with tab3:
-    st.plotly_chart(fig3, theme="streamlit", use_container_width=True)
-with tab4:
-    st.plotly_chart(fig4, theme="streamlit", use_container_width=True)
+# fig5.update_layout(
+#     xaxis_range=[-5, 55],
+#     yaxis_range=[-50, 200])
 
-tab1, tab2= st.tabs(["Production vs. Surface Area vs. Complaints by Owner", "Production vs. Age of Concessions vs. Complaints by Owner"])
-with tab1:
-    # Use the Streamlit theme.
-    # This is the default. So you can also omit the theme argument.
-    st.plotly_chart(fig, theme="streamlit", use_container_width=True)
-with tab2:
-    # Use the native Plotly theme.
-    st.plotly_chart(fig2, theme="streamlit", use_container_width=True)
+# fig6 = px.scatter(
+#     technical_projects,
+#     x="AGE_OF_CONCESSION (Years) Technical_Projects",
+#     y="SUPERFICIE_Technical_Projects",
+#     # size=,
+#     color="T_GRUPOESP",
+#     hover_name="T_GRUPOESP",
+#     log_x=False,
+#     size_max=60,
+#     hover_data=["Rna_Technical_Projects", "T_GRUPOESP", "TITULAR_Technical_Projects", "AGE_OF_CONCESSION (Years) Technical_Projects", ])
 
+# fig6.update_layout(
+#     xaxis_range=[-5, 55],
+#     yaxis_range=[-50, 200])
 
+# fig7 = px.scatter(
+#     technical_projects,
+#     x="AGE_OF_CONCESSION (Years) Technical_Projects",
+#     y="SUPERFICIE_Technical_Projects",
+#     # size=,
+#     color="TITULAR_Technical_Projects",
+#     hover_name="TITULAR_Technical_Projects",
+#     log_x=False,
+#     size_max=60,
+#     hover_data=["Rna_Technical_Projects", "REGION_Technical_Projects", "TITULAR_Technical_Projects","SUPERFICIE_Technical_Projects", ])
 
-st.subheader("Salmon Technical Projects Exploration")
+# fig7.update_layout(
+#     xaxis_range=[-5, 55],
+#     yaxis_range=[-50, 200])
 
-tab7, tab8 = st.tabs(["Age of Concession vs. Surface Area by Owner", "Age of Concession vs. Age of Concessions by Toponimio"])
-with tab7:
-    st.plotly_chart(fig7, theme="streamlit", use_container_width=True)
-with tab8:
-    st.plotly_chart(fig8, theme="streamlit", use_container_width=True)
-
-
-tab5, tab6= st.tabs(["Age of Concession vs. Surface Area by Region", "Age of Concession vs. Age of Concessions by Species"])
-with tab5:
-    st.plotly_chart(fig5, theme="streamlit", use_container_width=True, key="fig5")
-with tab6:
-    # Use the native Plotly theme.
-    st.plotly_chart(fig6, theme="streamlit", use_container_width=True, key="fig6")
-
-# st.dataframe(technical_projects)
-
-
-st.subheader("Salmon Complaints Normalized by Region")
-
-# how many Rna per region 
-rna_per_region = concessions_2024_by_production_complaints.groupby('REGION').agg({'Rna': 'count'})
-# change Rna to Rna_Count
-rna_per_region.rename(columns={'Rna': 'Rna_Count'}, inplace=True)
-
-# left join rna_per_region onto concessions_2024_by_production_complaints on REGION
-concessions_2024_by_production_complaints_rna_per_region = pd.merge(concessions_2024_by_production_complaints, rna_per_region, on='REGION', how='left')
-
-# st.dataframe(concessions_2024_by_production_complaints_rna_per_region)
-# print(rna_per_region.head())
-# left join rna_per_region onto concessions_2024_by_production_complaints on REGION
-concessions_2024_by_production_complaints_rna_per_region['Normalized_ComplaintCount_per_Rna'] = concessions_2024_by_production_complaints_rna_per_region['ComplaintCount']/concessions_2024_by_production_complaints_rna_per_region['Rna_Count']
-
-st.bar_chart(concessions_2024_by_production_complaints_rna_per_region, y='Normalized_ComplaintCount_per_Rna', x='REGION', color='REGION', use_container_width=True, height=500)
-
-# add small, well formated, table of the complaints by region
-
-st.subheader("Salmon Complaints over Time")
-
-# plotly line chart of aqua_tipline['DateComplaintSubmission']
-# group by DateComplaintSubmission and count the number of complaints
-aqua_tipline['DateComplaintSubmission'] = pd.to_datetime(aqua_tipline['DateComplaintSubmission'])
-aqua_tipline_grouped = aqua_tipline.groupby('DateComplaintSubmission').size().reset_index(name='ComplaintCount')
-fig4 = px.line(aqua_tipline_grouped, x='DateComplaintSubmission', y='ComplaintCount')
-st.plotly_chart(fig4, theme="streamlit", use_container_width=True)
-
-# st.subheader("Salmon Concessions Exploration")
-# st.map(concessions_2024_lat_long)
+# fig8 = px.scatter(
+#     technical_projects,
+#     x="AGE_OF_CONCESSION (Years) Technical_Projects",
+#     y="SUPERFICIE_Technical_Projects",
+#     # size=,
+#     color="TOPONIMIO",
+#     hover_name="TOPONIMIO",
+#     log_x=False,
+#     size_max=60,
+#     hover_data=["Rna_Technical_Projects", "REGION_Technical_Projects", "TITULAR_Technical_Projects", "AGE_OF_CONCESSION (Years) Technical_Projects", "SUPERFICIE_Technical_Projects"])
 
 
-######
+# fig8.update_layout(
+#     xaxis_range=[-5, 55],
+#     yaxis_range=[-50, 200])
+
+
+# st.subheader("Salmons Concessions & Complaints Exploration")
+
+# tab3, tab4 = st.tabs(["Production vs. Surface Area vs. Complaints by Region", "Production vs. Age of Concessions vs. Complaints by Region"])
+# with tab3:
+#     st.plotly_chart(fig3, theme="streamlit", use_container_width=True)
+# with tab4:
+#     st.plotly_chart(fig4, theme="streamlit", use_container_width=True)
+
+# tab1, tab2= st.tabs(["Production vs. Surface Area vs. Complaints by Owner", "Production vs. Age of Concessions vs. Complaints by Owner"])
+# with tab1:
+#     # Use the Streamlit theme.
+#     # This is the default. So you can also omit the theme argument.
+#     st.plotly_chart(fig, theme="streamlit", use_container_width=True)
+# with tab2:
+#     # Use the native Plotly theme.
+#     st.plotly_chart(fig2, theme="streamlit", use_container_width=True)
+
+
+
+# st.subheader("Salmon Technical Projects Exploration")
+
+# tab7, tab8 = st.tabs(["Age of Concession vs. Surface Area by Owner", "Age of Concession vs. Age of Concessions by Toponimio"])
+# with tab7:
+#     st.plotly_chart(fig7, theme="streamlit", use_container_width=True)
+# with tab8:
+#     st.plotly_chart(fig8, theme="streamlit", use_container_width=True)
+
+
+# tab5, tab6= st.tabs(["Age of Concession vs. Surface Area by Region", "Age of Concession vs. Age of Concessions by Species"])
+# with tab5:
+#     st.plotly_chart(fig5, theme="streamlit", use_container_width=True, key="fig5")
+# with tab6:
+#     # Use the native Plotly theme.
+#     st.plotly_chart(fig6, theme="streamlit", use_container_width=True, key="fig6")
+
+# # st.dataframe(technical_projects)
+
+
+# st.subheader("Salmon Complaints Normalized by Region")
+
+# # how many Rna per region 
+# rna_per_region = concessions_2024_by_production_complaints.groupby('REGION').agg({'Rna': 'count'})
+# # change Rna to Rna_Count
+# rna_per_region.rename(columns={'Rna': 'Rna_Count'}, inplace=True)
+
+# # left join rna_per_region onto concessions_2024_by_production_complaints on REGION
+# concessions_2024_by_production_complaints_rna_per_region = pd.merge(concessions_2024_by_production_complaints, rna_per_region, on='REGION', how='left')
+
+# # st.dataframe(concessions_2024_by_production_complaints_rna_per_region)
+# # print(rna_per_region.head())
+# # left join rna_per_region onto concessions_2024_by_production_complaints on REGION
+# concessions_2024_by_production_complaints_rna_per_region['Normalized_ComplaintCount_per_Rna'] = concessions_2024_by_production_complaints_rna_per_region['ComplaintCount']/concessions_2024_by_production_complaints_rna_per_region['Rna_Count']
+
+# st.bar_chart(concessions_2024_by_production_complaints_rna_per_region, y='Normalized_ComplaintCount_per_Rna', x='REGION', color='REGION', use_container_width=True, height=500)
+
+# # add small, well formated, table of the complaints by region
+
+# st.subheader("Salmon Complaints over Time")
+
+# # plotly line chart of aqua_tipline['DateComplaintSubmission']
+# # group by DateComplaintSubmission and count the number of complaints
+# aqua_tipline['DateComplaintSubmission'] = pd.to_datetime(aqua_tipline['DateComplaintSubmission'])
+# aqua_tipline_grouped = aqua_tipline.groupby('DateComplaintSubmission').size().reset_index(name='ComplaintCount')
+# fig4 = px.line(aqua_tipline_grouped, x='DateComplaintSubmission', y='ComplaintCount')
+# st.plotly_chart(fig4, theme="streamlit", use_container_width=True)
+
+# # st.subheader("Salmon Concessions Exploration")
+# # st.map(concessions_2024_lat_long)
+
+
+# ######
 
