@@ -6,6 +6,16 @@ import seaborn as sns
 import time
 from pyprojroot import here
 
+
+import os 
+# print current directory
+print('current directory:')
+print(os.getcwd())  
+st.write('current directory:')
+st.write(os.getcwd())  
+
+
+
 # # spinner until the entire page is loaded
 # with st.spinner("Loading page..."):
 #     # pause for 3 seconds

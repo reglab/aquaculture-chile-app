@@ -67,9 +67,3 @@ elif authentication_status == True:
     st.sidebar.button("End Session", on_click=finish_session)
     pg.run()
     st.sidebar.write(f"Welcome, {name}!")
-
-
-import os 
-# print current directory
-print('current directory:')
-print(os.getcwd())  
