@@ -3,7 +3,7 @@ import streamlit as st
 
 
 
-with open('/Users/victholl/Documents/aquaculture_chile/aqua-app/media/disconnection_map.html', 'r') as file:
+with open('media/disconnection_map.html', 'r') as file:
     html_map_1 = file.read()
 
 # make map bigger height and width
