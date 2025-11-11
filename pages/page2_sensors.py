@@ -3,6 +3,12 @@ import streamlit as st
 
 st.write("test")
 
+import os
+# print current directory
+print('current directory:')
+print(os.getcwd())  
+st.write('current directory:')
+st.write(os.getcwd())  
 
 # with open('media/disconnection_map.html', 'r') as file:
 #     html_map_1 = file.read()
