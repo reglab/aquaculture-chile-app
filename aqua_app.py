@@ -66,7 +66,3 @@ elif authentication_status == True:
     pg.run()
     st.sidebar.write(f"Welcome, {name}!")
     st.sidebar.button("End Session", on_click=finish_session)
-
-    
-
-
