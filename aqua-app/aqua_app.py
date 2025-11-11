@@ -65,5 +65,5 @@ elif authentication_status == True:
         authenticator.logout("End Session", "sidebar")
     
     st.sidebar.button("End Session", on_click=finish_session)
-    # pg.run()
+    pg.run()
     st.sidebar.write(f"Welcome, {name}!")
