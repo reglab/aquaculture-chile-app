@@ -6,14 +6,7 @@ import seaborn as sns
 import time
 from pyprojroot import here
 
-
-import os 
-# print current directory
-print('current directory:')
-print(os.getcwd())  
-st.write('current directory:')
-st.write(os.getcwd())  
-
+st.title("Welcome to the Chile Aquaculture Project")
 
 
 # # spinner until the entire page is loaded

@@ -67,11 +67,6 @@ elif authentication_status == True:
     st.sidebar.write(f"Welcome, {name}!")
     st.sidebar.button("End Session", on_click=finish_session)
 
-    # print current directory
-    print('current directory:')
-    print(os.getcwd())  
-    st.write('current directory:')
-    st.write(os.getcwd())  
     
 
 
